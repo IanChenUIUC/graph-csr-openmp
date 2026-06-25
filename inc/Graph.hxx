@@ -413,7 +413,7 @@ template <class K = uint32_t, class V = None, class E = None> class DiGraph
  * @tparam E edge value type (edge weight)
  * @tparam O offset type
  */
-template <class K = uint32_t, class V = None, class E = None, class O = size_t> class DiGraphCsr
+template <class K = uint32_t, class O = size_t, class V = None, class E = None> class DiGraphCsr
 {
 #pragma region TYPES
   public:
