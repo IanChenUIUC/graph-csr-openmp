@@ -2,9 +2,12 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <omp.h>
 #include <string_view>
 #include <type_traits>
 #include <vector>
+
+#include "_string.hxx"
 
 using std::memcpy;
 using std::min;
