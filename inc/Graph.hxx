@@ -431,8 +431,6 @@ template <class K = uint32_t, class V = None, class E = None, class O = size_t> 
   public:
     /** Offsets of the outgoing edges of vertices. */
     vector<O> offsets;
-    /** Degree of each vertex. */
-    vector<K> degrees;
     /** Vertex values. */
     vector<V> values;
     /** Vertex ids of the outgoing edges of each vertex (lookup using offsets). */
@@ -451,7 +449,7 @@ template <class K = uint32_t, class V = None, class E = None, class O = size_t> 
      */
     inline size_t span() const noexcept
     {
-        return degrees.size();
+        return order();
     }
 
     /**
@@ -460,7 +458,7 @@ template <class K = uint32_t, class V = None, class E = None, class O = size_t> 
      */
     inline size_t order() const noexcept
     {
-        return degrees.size();
+        return offsets.empty() ? 0 : offsets.size() - 1;
     }
 
     /**
@@ -469,10 +467,7 @@ template <class K = uint32_t, class V = None, class E = None, class O = size_t> 
      */
     inline size_t size() const noexcept
     {
-        size_t M = 0;
-        for (auto d : degrees)
-            M += d;
-        return M;
+        return edgeKeys.size();
     }
 
     /**
@@ -481,7 +476,7 @@ template <class K = uint32_t, class V = None, class E = None, class O = size_t> 
      */
     inline bool empty() const noexcept
     {
-        return degrees.empty();
+        return order() == 0;
     }
 
     /**
@@ -524,7 +519,7 @@ template <class K = uint32_t, class V = None, class E = None, class O = size_t> 
     template <class FP> inline void forEachEdge(K u, FP fp) const noexcept
     {
         size_t i = offsets[u];
-        size_t d = degrees[u];
+        size_t d = degree(u);
         for (size_t I = i + d; i < I; ++i)
             fp(edgeKeys[i], edgeValues[i]);
     }
@@ -537,7 +532,7 @@ template <class K = uint32_t, class V = None, class E = None, class O = size_t> 
     template <class FP> inline void forEachEdgeKey(K u, FP fp) const noexcept
     {
         size_t i = offsets[u];
-        size_t d = degrees[u];
+        size_t d = degree(u);
         for (size_t I = i + d; i < I; ++i)
             fp(edgeKeys[i]);
     }
@@ -556,7 +551,7 @@ template <class K = uint32_t, class V = None, class E = None, class O = size_t> 
         if (!hasVertex(u) || !hasVertex(v))
             return size_t(-1);
         size_t i = offsets[u];
-        size_t d = degrees[u];
+        size_t d = degree(u);
         auto ib = edgeKeys.begin() + i;
         auto ie = edgeKeys.begin() + i + d;
         auto it = find(ib, ie, v);
@@ -595,7 +590,7 @@ template <class K = uint32_t, class V = None, class E = None, class O = size_t> 
      */
     inline size_t degree(K u) const noexcept
     {
-        return u < span() ? degrees[u] : 0;
+        return u < span() ? offsets[u + 1] - offsets[u] : 0;
     }
 
     /**
@@ -660,7 +655,6 @@ template <class K = uint32_t, class V = None, class E = None, class O = size_t> 
     inline void resize(size_t n)
     {
         offsets.resize(n + 1);
-        degrees.resize(n);
         values.resize(n);
     }
 
@@ -672,7 +666,6 @@ template <class K = uint32_t, class V = None, class E = None, class O = size_t> 
     inline void resize(size_t n, size_t m)
     {
         offsets.resize(n + 1);
-        degrees.resize(n);
         values.resize(n);
         edgeKeys.resize(m);
         edgeValues.resize(m);
@@ -707,7 +700,6 @@ template <class K = uint32_t, class V = None, class E = None, class O = size_t> 
     DiGraphCsr(size_t n, size_t m)
     {
         offsets.resize(n + 1);
-        degrees.resize(n);
         values.resize(n);
         edgeKeys.resize(m);
         edgeValues.resize(m);
