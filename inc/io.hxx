@@ -99,11 +99,11 @@ inline size_t readMtxFormatHeaderW(bool &symmetric, size_t &rows, size_t &cols, 
  * @param symmetric is graph symmetric?
  * @param fb on body line (u, v, w)
  */
-template <bool WEIGHTED = false, int BASE = 1, class FB>
+template <bool WEIGHTED = false, int BASE = 1, char sep = ',', char comment = '#', class FB>
 inline void readEdgelistFormatDoChecked(string_view data, bool symmetric, FB fb)
 {
-    auto fu = [](char c) { return c == ','; };                         // Support CSV
-    auto fw = [](char c) { return c == ',' || c == '%' || c == '#'; }; // Support CSV, comments
+    auto fu = [](char c) { return c == sep; };                 // Support CSV
+    auto fw = [](char c) { return c == sep || c == comment; }; // Support CSV, comments
     auto ib = data.begin(), ie = data.end(), it = ib;
     for (; it != ie; it = findNextLine(it, ie))
     {
